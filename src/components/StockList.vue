@@ -14,19 +14,19 @@
                    :value="true"
                    type="success"
           >
-            New movie has been added.
+            New stock has been added.
           </v-alert>
           <v-alert v-if="showMsg === 'update'" dismissible
                    :value="true"
                    type="success"
           >
-            Movie information has been updated.
+            Stock information has been updated.
           </v-alert>
           <v-alert v-if="showMsg === 'deleted'" dismissible
                    :value="true"
                    type="success"
           >
-            Selected Movie has been deleted.
+            Selected Stock has been deleted.
           </v-alert>
         </v-col>
       </v-row>
@@ -36,23 +36,21 @@
         <v-col cols="12" md="10" v-resize="onResize">
             <v-data-table
               :headers="headers"
-              :items="customers"
+              :items="stocks"
               class="elevation-1"
               style="max-height: 300px; overflow-y: auto"
               v-if="isMobile"
             >
                     <template v-slot:item="props">
                       <tr>
-                        <td align="left">{{ props.item.name }}</td>
-                        <td align="left">{{ props.item.address }}</td>
                         <td align="left">{{ props.item.cust_number }}</td>
-                        <td align="left">{{ props.item.city }}</td>
-                        <td align="left">{{ props.item.state }}</td>
-                        <td align="left">{{ props.item.zipcode }}</td>
-                        <td align="left">{{ props.item.email }}</td>
-                        <td align="left">{{ props.item.cell_phone }}</td>
-                        <td  @click="updateCustomers(props.item)" align="center"><v-icon >mdi-pencil</v-icon></td> <!-- [@click="updateCustomers(props.item)"] -->
-                        <td @click="deleteCustomer(props.item)" align="center"><v-icon >mdi-delete</v-icon></td> <!-- [@click="deleteCustomer(props.item)"] -->
+                        <td align="left">{{ props.item.symbol }}</td>
+                        <td align="left">{{ props.item.name }}</td>
+                        <td align="left">{{ props.item.shares }}</td>
+                        <td align="left">{{ props.item.purchase_price }}</td>
+                        <td align="left">{{ props.item.purchase_date }}</td>
+                        <td  @click="updateStock(props.item)" align="center"><v-icon >mdi-pencil</v-icon></td> <!-- [@click="updateStock(props.item)"] -->
+                        <td @click="deleteStock(props.item)" align="center"><v-icon >mdi-delete</v-icon></td> <!-- [@click="deleteStock(props.item)"] -->
                       </tr>  
                     </template>
               </v-data-table>
@@ -73,8 +71,8 @@
                           <v-col cols="9" class="text-left body-2 text-truncate">{{ item.name }}</v-col>
                           <v-col cols="3" class="text-center">
                             <v-card-actions>
-                              <v-icon @click="updateCustomers(item)" class="small">mdi-pencil</v-icon> <!-- [@click="updateCustomers(item)"] -->
-                              <v-icon @click="deleteCustomer(item)" class="small">mdi-delete</v-icon> <!-- [@click="deleteCustomer(item)"] -->
+                              <v-icon @click="updateStock(item)" class="small">mdi-pencil</v-icon> <!-- [@click="updateStock(item)"] -->
+                              <v-icon @click="deleteStock(item)" class="small">mdi-delete</v-icon> <!-- [@click="deleteStock(item)"] -->
                               <v-icon @click.native="expand(item, !isExpanded(item))" class="small">mdi-dots-horizontal</v-icon> <!-- [@click.native="expand(item, !isExpanded(item))"] -->
                             </v-card-actions>
                           </v-col>
@@ -99,7 +97,7 @@
                   </v-row>
                 </template>     
               </v-data-iterator>  
-              <v-btn class="blue mt-4 white--text" @click="addNewCustomer" >Add Customer</v-btn>  <!-- [@click="addNewMovie"] -->
+              <v-btn class="blue mt-4 white--text" @click="addNewStock" >Add Stock</v-btn>  <!-- [@click="addNewMovie"] -->
         </v-col>  
       </v-row>
     </v-container>  
@@ -114,29 +112,25 @@
   const apiService = new APIService();
 
   export default {
-    name: "CustomerList",
+    name: "StockList",
     data: () => ({
-      customers: [],
+      stocks: [],
       validUserName: "Guest",
-      customerSize: 0,
+      stockSize: 0,
       showMsg: '',
       isMobile: false,
       headers: [
-        {text: 'Name', sortable: false, align: 'left'},
-        {text: 'Address', sortable: false, align: 'left',},
         {text: 'Customer Number', sortable: false, align: 'left',},
-        {text: 'City', sortable: false, align: 'left',},
-        {text: 'State', sortable: false, align: 'center',},
-        {text: 'Zipcode', sortable: false, align: 'center',},
-        {text: 'Email', sortable: false, align: 'center',},
-        {text: 'Cell Phone', sortable: false, align: 'center',},
-        {text: 'Update Customer', sortable: false, align: 'center',},
-        {text: 'Delete Customer', sortable: false, align: 'center',},
+        {text: 'Symbol', sortable: false, align: 'left',},
+        {text: 'Name', sortable: false, align: 'center',},
+        {text: 'Shares', sortable: false, align: 'center',},
+        {text: 'Purchase Price', sortable: false, align: 'center',},
+        {text: 'Purchase Date', sortable: false, align: 'center',},
       ],
 
     }),
     mounted() {
-      this.getCustomers();
+      this.getStocks();
       this.showMessages();
     },
     methods: {
@@ -152,12 +146,12 @@
           this.showMsg = this.$route.params.msg;
         }
       },
-      getCustomers() {
-        apiService.getCustomerList().then(response => {
-          this.customers = response.data.data;
+      getStocks() {
+        apiService.getStockList().then(response => {
+          this.stocks = response.data.data;
           console.log(response.data.data);
           console.log(response.data);
-          this.customerSize = this.customers.length;
+          this.stockSize = this.stocks.length;
           if (localStorage.getItem("isAuthenticates")
             && JSON.parse(localStorage.getItem("isAuthenticates")) === true) {
             this.validUserName = JSON.parse(localStorage.getItem("log_user"));
@@ -171,22 +165,22 @@
           }
         });
       },
-      addNewCustomer() {
+      addNewStock() {
         if (localStorage.getItem("isAuthenticates")
           && JSON.parse(localStorage.getItem("isAuthenticates")) === true) {
-          router.push('/customer-create');
+          router.push('/stock-create');
         } else {
           router.push("/auth");
         }
       },
-      updateCustomers(customer) {
-        router.push('/customer-update/' + customer.pk);
+      updateStock(stock) {
+        router.push('/stock-update/' + stock.pk);
       },
-      deleteCustomer(customer) {
-        apiService.deleteCustomer(customer.pk).then(response => {
+      deleteStock(stock) {
+        apiService.deleteStock(stock.pk).then(response => {
           if (response.status === 204) {
-            router.push('/customer-list/')
-            this.getCustomers()
+            router.push('/stock-list/')
+            this.getStocks()
           }
         }).catch(error => {
           if (error.response.status === 401) {
